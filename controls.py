@@ -8,9 +8,8 @@ from pyWinActivate import win_activate, win_wait_active, check_win_exist
 
 # MEUS ARQUIVOS #
 import config
-from user_model import *
+from user_model import usuario
 from banco import get_id, extract_full_name, extract_name, login_sige, get_parameters
-#               #
 
 sige_path = r"\\servidor\sigewin\Arquivos de Programas\SIGEWin\sige.exe"
 asstec_path = r"\\servidor\sigewin\Arquivos de Programas\SIGEWin\TemposAsstec.exe"
@@ -99,7 +98,7 @@ def look_workman(asstec_number):
     menu = True
     while menu:
         try:
-            sige = pg.locateOnScreen(r'Utils\menu_sige.png',confidence=0.8,)
+            sige = pg.locateOnScreen(r'utils\menu_sige.png',confidence=0.8,)
             pg.move(sige)
             pg.click(sige)
             break
@@ -152,13 +151,13 @@ def send_time_info(key: str, my_time: str, date: str):
         tab_number = 4
         
     win_wait_active("SIGEWin - Entrada de Tempos")      
-    pg.write(Usuario.asstec)   
+    pg.write(usuario.asstec)   
     pg.press('tab')
-    pg.write(Usuario.etapa)
+    pg.write(usuario.etapa)
     pg.press('tab', presses=2)
-    pg.write(Usuario.workstation)
+    pg.write(usuario.workstation)
     pg.press('tab')
-    pg.write(Usuario.id)
+    pg.write(usuario.id)
     pg.hotkey('ctrl','h')
     pg.press('tab', presses=tab_number)
     pg.write(config.sige_default_user)
@@ -218,14 +217,14 @@ def get_user(username):
     return username
 
 def get_login_info():
-    Usuario.name = extract_name(Usuario.id) # Pega o ID e procura o primeiro nome
-    get_user(Usuario.name)
-    config.sige_user, config.sige_password = login_sige(Usuario.id)
-    Usuario.asstec, Usuario.etapa, Usuario.status, Usuario.I_time, Usuario.F_time = get_parameters(Usuario.id)
+    usuario.name = extract_name(usuario.id) # Pega o ID e procura o primeiro nome
+    get_user(usuario.name)
+    config.sige_user, config.sige_password = login_sige(usuario.id)
+    usuario.asstec, usuario.etapa, usuario.status, usuario.I_time, usuario.F_time = get_parameters(usuario.id)
 
 def user_parameters():
-    Usuario.id = get_id(Usuario.name) # Pega o ID e procura o primeiro nome
-    Usuario.asstec, Usuario.etapa, Usuario.status, Usuario.I_time, Usuario.F_time = get_parameters(Usuario.id)
+    usuario.id = get_id(usuario.name) # Pega o ID e procura o primeiro nome
+    usuario.asstec, usuario.etapa, usuario.status, usuario.I_time, usuario.F_time = get_parameters(usuario.id)
 
 def order_infos(status: str): # Organizar o radiogroup pra mandar a informação certa
     # sE ENTROU OU SAIU MANDA HORA DA INTERFACE E VAZIO
@@ -233,20 +232,20 @@ def order_infos(status: str): # Organizar o radiogroup pra mandar a informação
         return config.time, None
     # SE MANHA MANDA HORARIO DO USUARIO E 11:50
     elif status == "manha":
-        return Usuario.I_time, "11:50" # retorna 07:00 e 11:50
+        return usuario.I_time, "11:50" # retorna 07:00 e 11:50
     # SE TARDE MANDA 12:50 E HORARIO FINAL USUARIO
     elif status == "tarde":
-        return "12:50", Usuario.F_time
+        return "12:50", usuario.F_time
     # MANDA EXPEDIENTE INTEIRO DO USUARIO
     elif status == "dia_completo":
         if config.extra_time == True: # SE FOR HORA EXTRA
-            if Usuario.F_time <= get_current_time(): # HORA DO USER MENOR Q HORA ATUAL
+            if usuario.F_time <= get_current_time(): # HORA DO USER MENOR Q HORA ATUAL
                 config.f_time = get_current_time() # F_TIME = HORA ATUAL
         else:
-            config.f_time = Usuario.F_time
-        return Usuario.I_time, config.f_time
+            config.f_time = usuario.F_time
+        return usuario.I_time, config.f_time
     elif status == "varios_dias":
-        return Usuario.I_time, Usuario.F_time
+        return usuario.I_time, usuario.F_time
 
 def edit_time(my_time):
     if my_time == None: 
