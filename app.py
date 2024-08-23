@@ -2,7 +2,7 @@ import flet as ft
 import time
 
 # MEUS ARQUIVOS #
-from user_model import Usuario
+from user_model import usuario
 from banco import *
 from ler_etapa import *
 from usersettings import *
@@ -14,14 +14,14 @@ class App(ft.Container): # App principal dentro de um container
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
+        #usuario. = Usuario()
         
+        init_parameters()
         self.show_home_page()
         
     def initialize_pages(self):
         self.home_page = ft.Container()
         self.user_settings_page_container = ft.Container
-
-    init_parameters()    
     
     def show_home_page(self):
         self.page.controls.clear()
@@ -145,7 +145,7 @@ class App(ft.Container): # App principal dentro de um container
             max_length=5,
             prefix_icon=ft.icons.ONETWOTHREE_OUTLINED,
             on_change=self.clear_error,
-            value = Usuario.asstec,
+            value = usuario.asstec,
         )
         
         self.workman=ft.IconButton(
@@ -160,7 +160,7 @@ class App(ft.Container): # App principal dentro de um container
             prefix_icon=ft.icons.WORK,
             max_length=4,
             capitalization=ft.TextCapitalization.CHARACTERS,
-            value = Usuario.etapa,
+            value = usuario.etapa,
         )
         
         self.etapa_dropdown=ft.Dropdown(   # LISTA DROPDOWN DAS ETAPAS (SETINHA)
@@ -305,7 +305,7 @@ class App(ft.Container): # App principal dentro de um container
             width=300,
             prefix_icon=ft.icons.ASSIGNMENT_IND,
             capitalization=ft.TextCapitalization.WORDS,
-            value = Usuario.name,
+            value = usuario.name,
             on_blur = self.user_changed,
         )
 
@@ -634,7 +634,7 @@ class App(ft.Container): # App principal dentro de um container
         self.page.update()
     
     def user_changed(self,e):
-        Usuario.name = self.user.value
+        usuario.name = self.user.value
         user_parameters()
     
     def extra_time_changed(self,e):
@@ -779,13 +779,13 @@ class App(ft.Container): # App principal dentro de um container
     def is_error_status_to_db(self): # VERIFICA SE USUARIO JA ENTROU NO TEMPO OU NAO
          # Se no banco de dados ta como entrou ultima vez e a pessoa quer entrar
         values = ["entrou","manha","tarde","dia_completo","varios_dias"]
-        if Usuario.status == "entrou":
+        if usuario.status == "entrou":
             for value in values:
                 if self.time_select.value == value:
                     self.text_snack_bar("VOCÊ JA ESTA EM UM TEMPO, SAIA ANTES DE ENTRAR","erro")
                     return True
                 
-        elif Usuario.status == "saiu":
+        elif usuario.status == "saiu":
             if self.time_select.value == "saiu":
                 self.text_snack_bar("VOCÊ NÃO ENTROU EM NENHUM TEMPO","erro")
                 return True
@@ -793,12 +793,12 @@ class App(ft.Container): # App principal dentro de um container
     
     def is_error(self): # VERIFICA CAMPO VAZIO E SE JA ENTROU EM OUTRA ASSTEC/ETAPA
 
-        if Usuario.etapa != self.etapa.value and Usuario.status == "entrou": # ERRO ENTROU EM OUTRA ETAPA
+        if usuario.etapa != self.etapa.value and usuario.status == "entrou": # ERRO ENTROU EM OUTRA ETAPA
             self.etapa.error_text = "Entrou em outra etapa"
             self.page.update()
             return True
         
-        elif Usuario.asstec != self.asstec.value and Usuario.status == "entrou": # ERRO ENTROU EM OUTRA ASSTEC 
+        elif usuario.asstec != self.asstec.value and usuario.status == "entrou": # ERRO ENTROU EM OUTRA ASSTEC 
             self.asstec.error_text = "Entrou em outra asstec"
             self.page.update()
             return True
@@ -809,22 +809,22 @@ class App(ft.Container): # App principal dentro de um container
             self.text_snack_bar("PREENCHA O CAMPO DE HORARIO","erro")
             return True
         
-        Usuario.asstec = self.asstec.value
-        Usuario.etapa = self.etapa.value
-        Usuario.name = self.user.value
+        usuario.asstec = self.asstec.value
+        usuario.etapa = self.etapa.value
+        usuario.name = self.user.value
         
         if self.is_error_status_to_db(): return True
         
-        Usuario.status = self.time_select.value # SETA STATUS DO USUARIO
+        usuario.status = self.time_select.value # SETA STATUS DO USUARIO
         return False
     
     def execute_time(self,e):
         
         if self.is_error(): return # SE TIVER ALGO INCOERENTE NOS CAMPOS N ENTRA NO TEMPO E AVISA
         
-        Usuario.id = get_id(Usuario.name) # pega o cracha
-        workstation = int(search_workstation_from_ods(Usuario.etapa)) # Busca a bancada da etapa
-        Usuario.workstation = str(workstation)
+        usuario.id = get_id(usuario.name) # pega o cracha
+        workstation = int(search_workstation_from_ods(usuario.etapa)) # Busca a bancada da etapa
+        usuario.workstation = str(workstation)
         if config.init_date == None:
             config.init_date = get_current_date()
         
@@ -832,28 +832,28 @@ class App(ft.Container): # App principal dentro de um container
             config.time = get_current_time()
 
         # PEGA A HORA DO USUARIO ATUAL
-        Usuario.I_time, Usuario.F_time = get_db_time(Usuario.id)
+        usuario.I_time, usuario.F_time = get_db_time(usuario.id)
         # MANDA O STATUS E DEFINE A HORA QUE SERA ENVIADA    
-        config.time, config.f_time = order_infos(Usuario.status)
+        config.time, config.f_time = order_infos(usuario.status)
         
         config.time = edit_time(config.time) # TRANSFORMA EM STRING SEM :
         config.f_time = edit_time(config.f_time)
         
         open_time() # ABRE A ENTRADA DE TEMPOS SE NAO ESTIVER ABERTA E LOGIN
         
-        if Usuario.status == "varios_dias":
+        if usuario.status == "varios_dias":
             is_sucess = process_multiple_days(config.init_date,config.final_date)
         
         else:
-            is_sucess = receive_sige_keys(Usuario.status) # MANDA AS INFORMAÇOES
+            is_sucess = receive_sige_keys(usuario.status) # MANDA AS INFORMAÇOES
         
         # SE O TEMPO FOR FEITO CORRETO ATUALIZA AS INFORMAÇÕES NO DATABASE
         if is_sucess:
-            if Usuario.status != "entrou":
-                Usuario.status = "saiu"
-            Edit_Info(Usuario.id,"Asstec",Usuario.asstec) # atualiza db
-            Edit_Info(Usuario.id,"Etapa",Usuario.etapa)
-            Edit_Info(Usuario.id,"Status",Usuario.status)
+            if usuario.status != "entrou":
+                usuario.status = "saiu"
+            Edit_Info(usuario.id,"Asstec",usuario.asstec) # atualiza db
+            Edit_Info(usuario.id,"Etapa",usuario.etapa)
+            Edit_Info(usuario.id,"Status",usuario.status)
             
             self.text_snack_bar("TEMPO ADICIONADO COM SUCESSO","ok")
             

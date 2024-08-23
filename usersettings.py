@@ -2,7 +2,7 @@ import flet as ft
 import os
 
 # MEUS ARQUIVOS #
-from user_model import Usuario
+from user_model import usuario
 from banco import *
 import config
 from controls import get_login_info
@@ -91,7 +91,7 @@ class LoginPage(ft.Container):
                     f.write(password_str)
                     first_name = extract_name(username)
                     config.logged_in_user = first_name
-                    Usuario.id = username
+                    usuario.id = username
                     join_settings(self.page,first_name)
             else:
                 return
@@ -134,22 +134,16 @@ def join_settings(page:ft.Page,username):
     page.add(ft.Text(f"Olá, {username}", size=25, text_align=ft.TextAlign.CENTER))
     page.add(UserSettingsPage(page))
     
-def init_parameters():
+def init_parameters() -> bool:
     if os.path.exists(USER_FILE_PATH): # SE TIVER ARQUIVO TXT
         with open(USER_FILE_PATH, 'r') as f:
             crypt_password = f.read().strip() # LE A SENHA DO TXT
-            Usuario.id = verify_password(crypt_password) # Verifica se a senha do bloco de notas esta correta e retorna o ID
-            if Usuario.id is not None:
+            usuario.id = verify_password(crypt_password) # Verifica se a senha do bloco de notas esta correta e retorna o ID
+            if usuario.id is not None:
                 get_login_info()
                 return True
             else:
                 return False
-    Usuario.name = ""
-    Usuario.etapa = ""
-    Usuario.asstec = ""
-    Usuario.status = ""
-    Usuario.I_time = ""
-    Usuario.F_time = ""
     return False
             
 def init_user_settings(page:ft.Page):
